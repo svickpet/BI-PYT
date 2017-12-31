@@ -2,8 +2,10 @@ import numpy
 import sys
 from PIL import Image
 
+# TODO ukladani obrazku, ne zobrazovani
 
-def inv(data):
+
+def inverse(data):
     data = 255 - data
     return data
 
@@ -20,7 +22,7 @@ def grey(data):
 # ------------------------------------------------------------------
 
 
-def light(data):
+def lighter(data):
     for line in data:
         for pixel in line:
             for i in range(len(pixel)):
@@ -30,7 +32,7 @@ def light(data):
 # ------------------------------------------------------------------
 
 
-def dark(data):
+def darker(data):
     for line in data:
         for pixel in line:
             for i in range(len(pixel)):
@@ -39,22 +41,49 @@ def dark(data):
 
 # ------------------------------------------------------------------
 
-def letsDoOperations(data):
+
+def horizontalFlip(data, width):
+    for line in data:
+        for i in range(width//2):
+
+            tmp = list(line[i])
+            (line[i], line[width-1-i]) = line[width-1-i], tmp
+
+    return data
+
+# ------------------------------------------------------------------
+
+
+def letsDoOperations(data, w, h):
     operations = sys.argv[2:]
 
     for x in operations:
         if x == 'inv':
-            data = inv(data)
+            data = inverse(data)
 
         elif x == 'grey':
             data = grey(data)
 
         elif x == 'light':
-            data = light(data)
+            data = lighter(data)
 
         elif x == 'dark':
-            data = dark(data)
+            data = darker(data)
 
+        elif x == 'edges':
+            pass
+            # edges(data)
+
+        elif x == 'h-flip':
+            horizontalFlip(data, w)
+
+        elif x == 'v-flip':
+            pass
+            # verticalFlip(data)
+
+        else:
+            print("Tuto operaci neznám: " + x)
+            continue
         # TODO dalsi funkce
 
         newIm = Image.fromarray(data, 'RGB')
@@ -70,7 +99,10 @@ if len(sys.argv) == 2 and sys.argv[1] == 'help':
           'inv - inverzní obraz\n' \
           'grey - převod do odstínů šedi\n' \
           'light - zesvětlení\n' \
-          'dark - ztmavení\n'
+          'dark - ztmavení\n' \
+          'edges - zvýraznění hran\n' \
+          'h-flip - horizontální převrácení\n' \
+          'v-flip - vertikální převrácení\n'
 
     print(tmp)
 elif len(sys.argv) >= 2:
@@ -89,7 +121,7 @@ elif len(sys.argv) >= 2:
 
         im.show()
 
-        letsDoOperations(imageData)
+        letsDoOperations(imageData, width, height)
 
     except IOError:
         print('Obrázek nebyl nalezen, nebo chybí práva pro jeho otevření.')
