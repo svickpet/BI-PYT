@@ -1,6 +1,7 @@
 import numpy
 import sys
 from PIL import Image
+from copy import deepcopy
 
 # TODO ukladani obrazku, ne zobrazovani
 
@@ -54,6 +55,15 @@ def horizontalFlip(data, width):
 # ------------------------------------------------------------------
 
 
+def verticalFlip(data, height):
+    for i in range(height // 2):
+        tmp = deepcopy(data[i])  # TODO jde to i bez deepcopy?
+        data[i], data[height - 1 - i] = data[height - 1 - i], tmp
+
+    return data
+
+# ------------------------------------------------------------------
+
 def letsDoOperations(data, w, h):
     operations = sys.argv[2:]
 
@@ -79,7 +89,7 @@ def letsDoOperations(data, w, h):
 
         elif x == 'v-flip':
             pass
-            # verticalFlip(data)
+            verticalFlip(data, h)
 
         else:
             print("Tuto operaci neznám: " + x)
