@@ -10,6 +10,15 @@ def inv(data):
 # ------------------------------------------------------------------
 
 
+def grey(data):
+    # print(data[1])
+    for line in data:
+        for pixel in line:
+            pixel[1] = pixel[2] = pixel[0]
+
+# ------------------------------------------------------------------
+
+
 def letsDoOperations(data):
     operations = sys.argv[2:]
 
@@ -17,9 +26,8 @@ def letsDoOperations(data):
         if x == 'inv':
             data = inv(data)
 
-        elif x == 'sed':
-            pass
-            # sed(data)
+        elif x == 'grey':
+            grey(data)
 
         # TODO dalsi funkce
 
@@ -34,7 +42,7 @@ if len(sys.argv) == 2 and sys.argv[1] == 'help':
     tmp = '\n"semestralka.py cesta/k/obrazku operace"\n\n' \
           'Dostupné operace:\n-----------------\n' \
           'inv - inverzní obraz\n' \
-          'sed - převod do odstínů šedi\n'
+          'grey - převod do odstínů šedi\n'
 
     print(tmp)
 elif len(sys.argv) >= 2:
