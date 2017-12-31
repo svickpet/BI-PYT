@@ -3,13 +3,19 @@ import sys
 from PIL import Image
 
 
+def inv(data):
+    data = 255 - data
+    return data
+
+# ------------------------------------------------------------------
+
+
 def letsDoOperations(data):
     operations = sys.argv[2:]
 
     for x in operations:
         if x == 'inv':
-            pass
-            # data = inv(data)
+            data = inv(data)
 
         elif x == 'sed':
             pass
