@@ -15,9 +15,19 @@ def grey(data):
     for line in data:
         for pixel in line:
             pixel[1] = pixel[2] = pixel[0]
+    return data
 
 # ------------------------------------------------------------------
 
+
+def light(data):
+    for line in data:
+        for pixel in line:
+            for i in range(len(pixel)):
+                pixel[i] = pixel[i] + (255 - pixel[i]) * (1/4)
+    return data
+
+# ------------------------------------------------------------------
 
 def letsDoOperations(data):
     operations = sys.argv[2:]
@@ -27,7 +37,11 @@ def letsDoOperations(data):
             data = inv(data)
 
         elif x == 'grey':
-            grey(data)
+            data = grey(data)
+
+        elif x == 'light':
+            data = light(data)
+
 
         # TODO dalsi funkce
 
