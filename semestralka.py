@@ -4,7 +4,21 @@ from PIL import Image
 
 
 def letsDoOperations(data):
-    pass
+    operations = sys.argv[2:]
+
+    for x in operations:
+        if x == 'inv':
+            pass
+            # data = inv(data)
+
+        elif x == 'sed':
+            pass
+            # sed(data)
+
+        # TODO dalsi funkce
+
+        newIm = Image.fromarray(data, 'RGB')
+        newIm.show()
 
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
