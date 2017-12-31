@@ -29,6 +29,16 @@ def light(data):
 
 # ------------------------------------------------------------------
 
+
+def dark(data):
+    for line in data:
+        for pixel in line:
+            for i in range(len(pixel)):
+                pixel[i] = pixel[i] * (1 - 1/2)
+    return data
+
+# ------------------------------------------------------------------
+
 def letsDoOperations(data):
     operations = sys.argv[2:]
 
@@ -42,6 +52,8 @@ def letsDoOperations(data):
         elif x == 'light':
             data = light(data)
 
+        elif x == 'dark':
+            data = dark(data)
 
         # TODO dalsi funkce
 
@@ -56,7 +68,9 @@ if len(sys.argv) == 2 and sys.argv[1] == 'help':
     tmp = '\n"semestralka.py cesta/k/obrazku operace"\n\n' \
           'Dostupné operace:\n-----------------\n' \
           'inv - inverzní obraz\n' \
-          'grey - převod do odstínů šedi\n'
+          'grey - převod do odstínů šedi\n' \
+          'light - zesvětlení\n' \
+          'dark - ztmavení\n'
 
     print(tmp)
 elif len(sys.argv) >= 2:
