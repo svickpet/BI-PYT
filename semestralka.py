@@ -3,9 +3,8 @@ import sys
 from PIL import Image
 from copy import deepcopy
 
+
 # TODO ukladani obrazku, ne zobrazovani
-# TODO rozostreni obrazku konvolucni maska: 1,1,1 1,1,1 1,1,1 * 1/9
-#    nebo [[1,2,1], [2,4,2,], [1,2,1]] * 1/16 - Gauss"
 
 
 def inverse(data):
@@ -72,7 +71,7 @@ def verticalFlip(data, height):
 # ------------------------------------------------------------------
 
 
-def applyConvMask(data, y, x, convolutionMask, constant):  # TODO parametr convolutionMask, constant
+def applyConvMask(data, y, x, convolutionMask, constant):
     # convolutionMask = [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]]
     # convolutionMask = numpy.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
     # constant = 1
@@ -81,18 +80,17 @@ def applyConvMask(data, y, x, convolutionMask, constant):  # TODO parametr convo
 
     for i in range(-1, 2):
         for j in range(-1, 2):
-            # TODO okraje
-            if 0 <= x + j < height and 0 <= y + i < width:
+            if 0 <= x + j < width and 0 <= y + i < height:
                 # for k in range(len(data)):
-                pixelR += data[y + i, x + j, 0] * (convolutionMask[1 + i, 1 + j] * constant)
-                pixelG += data[y + i, x + j, 1] * (convolutionMask[1 + i, 1 + j] * constant)
-                pixelB += data[y + i, x + j, 2] * (convolutionMask[1 + i, 1 + j] * constant)
+                pixelR += data[y + i, x + j, 0] * convolutionMask[1 + i, 1 + j] * constant
+                pixelG += data[y + i, x + j, 1] * convolutionMask[1 + i, 1 + j] * constant
+                pixelB += data[y + i, x + j, 2] * convolutionMask[1 + i, 1 + j] * constant
 
                 # print(str(x + i) + ' ' + str(y + j) + " - " + str(1+i) + " " + str(1+j))
 
-                pixelR %= 256
-                pixelG %= 256
-                pixelB %= 256
+                # pixelR %= 256
+                # pixelG %= 256
+                # pixelB %= 256
 
     pixel = (pixelR, pixelG, pixelB)
     # print(pixel)
@@ -102,18 +100,62 @@ def applyConvMask(data, y, x, convolutionMask, constant):  # TODO parametr convo
 # ------------------------------------------------------------------
 
 
-def edges(data):
+def blur(data, width, height):
+    # convolutionMask = numpy.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
+    # constant = 1 / 9
+    convolutionMask = numpy.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]])
+    constant = 1 / 16
+
+    newData = numpy.zeros_like(data)
+
+    for y in range(0, height):
+        for x in range(0, width):
+            newData[y, x] = applyConvMask(data, y, x, convolutionMask, constant)
+
+    return newData
+
+
+# ------------------------------------------------------------------
+
+
+def sharpen(data, width, height):
+    # convolutionMask = numpy.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
+    # constant = 1 / 9
+    convolutionMask = numpy.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+    constant = 1/2
+
+    newData = numpy.zeros_like(data)
+
+    for y in range(0, height):
+        for x in range(0, width):
+            newData[y, x] = applyConvMask(data, y, x, convolutionMask, constant)
+
+    return newData
+
+
+# ------------------------------------------------------------------
+
+
+def edges(data, width, height):
+    data = grey(data)
+    data = blur(data, width, height)
 
     convolutionMask = numpy.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
-    constant = 1
+    constant = 1/4
 
+    # convolutionMask = numpy.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
+    # constant = 1
+
+    newData = numpy.zeros_like(data)
     # data = grey(data)
 
     # for line in data:
     # for pixel in line:
     for y in range(0, height):
         for x in range(0, width):
-            data[y, x] = applyConvMask(data, y, x, convolutionMask, constant)
+            newData[y, x] = applyConvMask(data, y, x, convolutionMask, constant)
+
+    return newData
 
 
 # ------------------------------------------------------------------
@@ -138,19 +180,23 @@ def letsDoOperations(data, w, h):
             data = darker(data)
 
         elif x == 'edges':
-            edges(data)
+            data = edges(data, w, h)
 
         elif x == 'h-flip':
-            horizontalFlip(data, w)
+            data = horizontalFlip(data, w)
 
         elif x == 'v-flip':
-            pass
-            verticalFlip(data, h)
+            data = verticalFlip(data, h)
+
+        elif x == 'blur':
+            data = blur(data, w, h)
+
+        elif x == 'sharp':
+            data = sharpen(data, w, h)
 
         else:
             print("Tuto operaci neznám: " + x)
             continue
-        # TODO dalsi funkce
 
         newIm = Image.fromarray(data, 'RGB')
         newIm.show()
