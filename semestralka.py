@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import sys
 from PIL import Image
 from copy import deepcopy
@@ -17,9 +17,14 @@ def inverse(data):
 
 def grey(data):
     # print(data[1])
-    for line in data:
-        for pixel in line:
-            pixel[1] = pixel[2] = pixel[0]
+
+    g = (0.299, 0.587, 0.114) * data
+    g2 = np.sum(g, axis=2)
+    data = (g2 + 0.5).astype(dtype=np.uint8) 	# pretypujeme
+    #print(g2.shape)
+    #for line in data:
+    #    for pixel in line:
+    #        pixel[1] = pixel[2] = pixel[0]
     return data
 
 
@@ -32,7 +37,6 @@ def lighter(data):
             for i in range(len(pixel)):
                 pixel[i] = pixel[i] + (255 - pixel[i]) * (1 / 4)
     return data
-
 
 # ------------------------------------------------------------------
 
@@ -103,10 +107,10 @@ def applyConvMask(data, y, x, convolutionMask, constant):
 def blur(data, width, height):
     # convolutionMask = numpy.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
     # constant = 1 / 9
-    convolutionMask = numpy.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]])
+    convolutionMask = np.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]])
     constant = 1 / 16
 
-    newData = numpy.zeros_like(data)
+    newData = np.zeros_like(data)
 
     for y in range(0, height):
         for x in range(0, width):
@@ -121,10 +125,10 @@ def blur(data, width, height):
 def sharpen(data, width, height):
     # convolutionMask = numpy.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
     # constant = 1 / 9
-    convolutionMask = numpy.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+    convolutionMask = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
     constant = 1/2
 
-    newData = numpy.zeros_like(data)
+    newData = np.zeros_like(data)
 
     for y in range(0, height):
         for x in range(0, width):
@@ -140,13 +144,13 @@ def edges(data, width, height):
     data = grey(data)
     data = blur(data, width, height)
 
-    convolutionMask = numpy.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
+    convolutionMask = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
     constant = 1/4
 
     # convolutionMask = numpy.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
     # constant = 1
 
-    newData = numpy.zeros_like(data)
+    newData = np.zeros_like(data)
     # data = grey(data)
 
     # for line in data:
@@ -163,7 +167,7 @@ def edges(data, width, height):
 
 def letsDoOperations(data, w, h):
     operations = sys.argv[2:]
-
+    mode = 'RGB'
     print("Obraz se zpracovává...")
 
     for x in operations:
@@ -172,6 +176,7 @@ def letsDoOperations(data, w, h):
 
         elif x == 'grey':
             data = grey(data)
+            mode = 'L'
 
         elif x == 'light':
             data = lighter(data)
@@ -195,11 +200,17 @@ def letsDoOperations(data, w, h):
             data = sharpen(data, w, h)
 
         else:
-            print("Tuto operaci neznám: " + x)
+            if x != 'show':
+                print("Tuto operaci neznám: " + x)
             continue
 
-        newIm = Image.fromarray(data, 'RGB')
-        newIm.show()
+            #newIm = Image.fromarray(data, 'RGB')
+        out = Image.fromarray(data, mode) 	
+        out.save(x + '.jpg')
+
+        if 'show' in sys.argv:        
+            out.show()
+
 
 
 # ------------------------------------------------------------------
@@ -221,16 +232,10 @@ if len(sys.argv) == 2 and sys.argv[1] == 'help':
 elif len(sys.argv) >= 2:
     try:
         pass
-        im = Image.open(sys.argv[1]).convert('RGB')
-        # print(im)
-
-        imageData = numpy.array(im)
-        # print(imageData)
-        # print(len(imageData))
-
+        im = Image.open(sys.argv[1])
         width, height = im.size
-        # print(str(width) + " " + str(height))
-        # print("mode: " + im.mode)
+
+        imageData = np.asarray(im)
 
         im.show()
 
