@@ -11,9 +11,7 @@ def inverse(data):
     data = 255 - data
     return data
 
-
 # ------------------------------------------------------------------
-
 
 def grey(data):
     # print(data[1])
@@ -24,9 +22,7 @@ def grey(data):
 
     return data
 
-
 # ------------------------------------------------------------------
-
 
 def lighter(data):
     for line in data:
@@ -37,7 +33,6 @@ def lighter(data):
 
 # ------------------------------------------------------------------
 
-
 def darker(data):
     for line in data:
         for pixel in line:
@@ -45,9 +40,7 @@ def darker(data):
                 pixel[i] = pixel[i] * (1 - 1 / 2)
     return data
 
-
 # ------------------------------------------------------------------
-
 
 def horizontalFlip(data, width):
 
@@ -58,55 +51,54 @@ def horizontalFlip(data, width):
 
     return newData
 
-
 # ------------------------------------------------------------------
-
 
 def verticalFlip(data, height):
 
     newData = np.zeros_like(data)
-
-    #for i in range(height // 2):
-    #    tmp = deepcopy(data[i])  # TODO jde to i bez deepcopy?
-    #   newData[i], newData[height - 1 - i] = data[height - 1 - i], tmp
 
     for (i, line) in enumerate(data):         
         newData[-i] = line
 
     return newData
 
-
 # ------------------------------------------------------------------
-
 
 def applyConvMask(data, y, x, convolutionMask, constant):
-    # convolutionMask = [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]]
-    # convolutionMask = numpy.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
-    # constant = 1
 
-    pixelR = pixelG = pixelB = 0
+    if len(data.shape) == 2:
+        channels = 1
+    else:
+        channels = data.shape[2] 
+   
+    l = ()
+  
+    if 0 < x < width-1 and 0 < y < height-1:
+        l += (data[y-1:y+2 , x-1:x+2],)
 
-    for i in range(-1, 2):
-        for j in range(-1, 2):
-            if 0 <= x + j < width and 0 <= y + i < height:
-                # for k in range(len(data)):
-                pixelR += data[y + i, x + j, 0] * convolutionMask[1 + i, 1 + j] * constant
-                pixelG += data[y + i, x + j, 1] * convolutionMask[1 + i, 1 + j] * constant
-                pixelB += data[y + i, x + j, 2] * convolutionMask[1 + i, 1 + j] * constant
+    else:
+        return 0
+    
+    #for i in range(-1, 2):
+    #    for j in range(-1, 2):
+    #        if 0 <= x + j < width and 0 <= y + i < height:
+    #           
+    #            pixelR += data[y + i, x + j, 0] * convolutionMask[1 + i, 1 + j] * constant
+    #            pixelG += data[y + i, x + j, 1] * convolutionMask[1 + i, 1 + j] * constant
+    #            pixelB += data[y + i, x + j, 2] * convolutionMask[1 + i, 1 + j] * constant
 
-                # print(str(x + i) + ' ' + str(y + j) + " - " + str(1+i) + " " + str(1+j))
+    #print(l)
 
-                # pixelR %= 256
-                # pixelG %= 256
-                # pixelB %= 256
+    n = ()
+    for x in l:
+        #print(x)
+        n += ((x*convolutionMask).sum() * constant,)
 
-    pixel = (pixelR, pixelG, pixelB)
-    # print(pixel)
-    return pixel
-
+    #print("...")
+    #print(n[0])
+    return n[0]
 
 # ------------------------------------------------------------------
-
 
 def blur(data, width, height):
     # convolutionMask = numpy.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
@@ -122,9 +114,7 @@ def blur(data, width, height):
 
     return newData
 
-
 # ------------------------------------------------------------------
-
 
 def sharpen(data, width, height):
     # convolutionMask = numpy.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
@@ -139,7 +129,6 @@ def sharpen(data, width, height):
             newData[y, x] = applyConvMask(data, y, x, convolutionMask, constant)
 
 # ------------------------------------------------------------------
-
 
 def edges(data, width, height):
     data = grey(data)
@@ -174,7 +163,7 @@ def rotate(data, width, height, angle):
     if tmp == 1:
         for (i, line) in enumerate(data):         
             newData[i] = line[::-1]
-        #newData = np.transpose(data, (1,0,2))
+        newData = np.transpose(newData, (1,0,2))
     # 180
     elif tmp == 2:
         for (i, line) in enumerate(data):    
@@ -183,8 +172,7 @@ def rotate(data, width, height, angle):
     # 270
     elif tmp == 3:
         for (i, line) in enumerate(data):         
-            newData[-i] = line[::-1]
-
+            newData[-i] = line[::1]
         newData = np.transpose(newData, (1,0,2))
     # 360
     elif tmp == 4:
@@ -193,7 +181,6 @@ def rotate(data, width, height, angle):
     return newData
 
 # ------------------------------------------------------------------
-
 
 def letsDoOperations(data, w, h):
     operations = sys.argv[2:]
@@ -216,6 +203,7 @@ def letsDoOperations(data, w, h):
 
         elif x == 'edges':
             data = edges(data, w, h)
+            mode = 'L'
 
         elif x == 'h-flip':
             data = horizontalFlip(data, w)
@@ -245,8 +233,6 @@ def letsDoOperations(data, w, h):
 
         out.show()
 
-
-
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
 
@@ -267,6 +253,7 @@ elif len(sys.argv) >= 2:
     try:
         pass
         im = Image.open(sys.argv[1])
+
         width, height = im.size
 
         imageData = np.asarray(im)
