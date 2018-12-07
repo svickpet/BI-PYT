@@ -21,10 +21,7 @@ def grey(data):
     g = (0.299, 0.587, 0.114) * data
     g2 = np.sum(g, axis=2)
     data = (g2 + 0.5).astype(dtype=np.uint8) 	# pretypujeme
-    #print(g2.shape)
-    #for line in data:
-    #    for pixel in line:
-    #        pixel[1] = pixel[2] = pixel[0]
+
     return data
 
 
@@ -53,23 +50,30 @@ def darker(data):
 
 
 def horizontalFlip(data, width):
-    for line in data:
-        for i in range(width // 2):
-            tmp = list(line[i])
-            (line[i], line[width - 1 - i]) = line[width - 1 - i], tmp
 
-    return data
+    newData = np.zeros_like(data)
+
+    for (i, line) in enumerate(data):         
+        newData[i] = line[::-1]
+
+    return newData
 
 
 # ------------------------------------------------------------------
 
 
 def verticalFlip(data, height):
-    for i in range(height // 2):
-        tmp = deepcopy(data[i])  # TODO jde to i bez deepcopy?
-        data[i], data[height - 1 - i] = data[height - 1 - i], tmp
 
-    return data
+    newData = np.zeros_like(data)
+
+    #for i in range(height // 2):
+    #    tmp = deepcopy(data[i])  # TODO jde to i bez deepcopy?
+    #   newData[i], newData[height - 1 - i] = data[height - 1 - i], tmp
+
+    for (i, line) in enumerate(data):         
+        newData[-i] = line
+
+    return newData
 
 
 # ------------------------------------------------------------------
@@ -134,9 +138,6 @@ def sharpen(data, width, height):
         for x in range(0, width):
             newData[y, x] = applyConvMask(data, y, x, convolutionMask, constant)
 
-    return newData
-
-
 # ------------------------------------------------------------------
 
 
@@ -161,6 +162,35 @@ def edges(data, width, height):
 
     return newData
 
+# ------------------------------------------------------------------
+
+def rotate(data, width, height, angle):    
+    newData = np.zeros_like(data)
+
+    tmp = angle // 90
+    print( str(angle) + " " + str(tmp) )
+
+    # 90
+    if tmp == 1:
+        for (i, line) in enumerate(data):         
+            newData[i] = line[::-1]
+        #newData = np.transpose(data, (1,0,2))
+    # 180
+    elif tmp == 2:
+        for (i, line) in enumerate(data):    
+            # from bottom = reversed line
+            newData[-i] = line[::-1]
+    # 270
+    elif tmp == 3:
+        for (i, line) in enumerate(data):         
+            newData[-i] = line[::-1]
+
+        newData = np.transpose(newData, (1,0,2))
+    # 360
+    elif tmp == 4:
+        return data
+
+    return newData
 
 # ------------------------------------------------------------------
 
@@ -199,6 +229,8 @@ def letsDoOperations(data, w, h):
         elif x == 'sharp':
             data = sharpen(data, w, h)
 
+        elif 'rotate' in x:
+            data = rotate(data, w, h, int( x.split("-")[1] ))
         else:
             if x != 'show':
                 print("Tuto operaci neznám: " + x)
@@ -208,8 +240,10 @@ def letsDoOperations(data, w, h):
         out = Image.fromarray(data, mode) 	
         out.save(x + '.jpg')
 
-        if 'show' in sys.argv:        
-            out.show()
+        #if 'show' in sys.argv:        
+        #    out.show()
+
+        out.show()
 
 
 
