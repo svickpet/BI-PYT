@@ -6,7 +6,7 @@ Konzolová aplikace, která dokáže načíst obrázek a provést na něm grafic
 
 
 **Obecný předpis pro použití konzolové aplikace:**
-"python semestralka.py cesta/k/obrazku operace"
+"python nazev_souboru.py cesta/k/obrazku operace"
 
 
 **Dostupné operace:**
