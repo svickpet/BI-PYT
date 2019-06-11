@@ -23,6 +23,5 @@ Konzolová aplikace, která dokáže načíst obrázek a provést na něm grafic
   - funkce bere i úhly vyšší než 360°
   - při zadání jiného úhlu než násobek 90, se úhel přepočítá na nejnižší násobek 90
 - **blur** - rozostření
-- **edges** - zvýraznění hran
 
 Operace je možné řetězit.
